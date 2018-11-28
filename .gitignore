@@ -157,3 +157,4 @@ cliente/env/
 
 # mypy
 .mypy_cache/
+.idea
