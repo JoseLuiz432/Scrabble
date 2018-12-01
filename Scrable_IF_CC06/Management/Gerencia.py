@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-from Scrable_IF_CC06.Management.Solve import Solve
-from Scrable_IF_CC06.Management.Jogador import Jogador
-from Scrable_IF_CC06.Interface.Interface import Provisorio
-from Scrable_IF_CC06.IA.Maquina import Maquina
+from Management.Solve import Solve
+from Management.Jogador import Jogador
+from Interface.Interface import Provisorio
+from IA.Maquina import Maquina
 from copy import copy
 from random import shuffle, randint
 
@@ -78,7 +78,7 @@ class Gerencia(object):
         :return: True se a palavra foi inserida com sucesso
         """
         flag_juncao = False
-        if x > 15 or y > 15 or x < 0 or y < 0:
+        if x > 14 or y > 14 or x < 0 or y < 0:
             return False, word, "Erro limite"
 
         if d == 'h':  # horizontal fixa x verifica y
@@ -162,6 +162,7 @@ class Gerencia(object):
                 # adicionando as letras da mesma linha a palavra para verificacao
                 c = 1
                 palavra = ''.join(word_list)
+
                 while (x-c) >= 0 and self.__tabuleiro[x-c][y] != 0:
                     palavra = self.__tabuleiro[x-c][y] + palavra
                     c += 1
@@ -187,7 +188,7 @@ class Gerencia(object):
                         c += 1
 
                     c = 1
-                    while (y - c) >= 0 and self.__tabuleiro[i][y - c] != 0 :
+                    while (y - c) >= 0 and self.__tabuleiro[i][y - c] != 0:
                         palavra = self.__tabuleiro[i][y - c] + palavra
                         c += 1
 
@@ -273,13 +274,17 @@ class Gerencia(object):
         self.proxima_jogada()
 
     def proxima_jogada(self):
-        while len(self.__sacoletras) != 0:
+        FlagJogador = [True, True]
+
+        while len(self.__sacoletras) != 0 or (FlagJogador[0] or FlagJogador[1]):
             player = self.__jogador[self.__numerojogadas % 2]
 
             # Verificar se o jogador e maquina
             if player.tipo == 'm':
+                flag = False
                 flag, word, x, y, d = player.acionar_ia()
                 if flag:
+                    FlagJogador[self.__numerojogadas % 2] = True
                     pontuacao = self.__solve.calcular_pontuacao(word, x, y, d)
                     player.add_palavra(word, pontuacao)
                     i = 0
@@ -287,8 +292,15 @@ class Gerencia(object):
                         if player.retirar_letra(l):
                             i += 1
                     player.adicionar_letra(i)
-                    self.interface.printar_jogada()
+                    self.interface.printar_jogada(x, y)
+                else:  # trocar as letras
+                    FlagJogador[self.__numerojogadas % 2] = False
+                    n = len(player.letras)
+                    for letra in player.letras:
+                        self.__jogador[self.__numerojogadas % 2].retirar_letra(letra)
+                        self.__sacoletras.append(letra)
 
+                    self.__jogador[self.__numerojogadas % 2].adicionar_letra(n)
                 self.__numerojogadas += 1
                 self.interface.atualizar_tabuleiro(self.__tabuleiro)
                 continue
@@ -297,8 +309,11 @@ class Gerencia(object):
             jogada = input(':')
 
             if jogada == 'opcoes':
-                self.opcoes()
+                FlagJogador[self.__numerojogadas % 2] = self.opcoes()
+                if not FlagJogador[self.__numerojogadas % 2]:
+                    self.passarvez()
                 continue
+
             dir, word = '', ''
             try:
                 dir, word = jogada.split()
@@ -342,7 +357,7 @@ class Gerencia(object):
                 print(erro)
                 continue
 
-            self.interface.printar_jogada()
+            self.interface.printar_jogada(x, y)
             self.__numerojogadas += 1
             self.interface.atualizar_tabuleiro(self.__tabuleiro)
             continue
@@ -362,9 +377,10 @@ class Gerencia(object):
         print("4- Voltar")
         escolha = input(":")
         if escolha == '1':
-            self.passarvez()
+            return False
         elif escolha == '2':
             self.trocarletras()
+            return False
         elif escolha == '3':
             pass
         else:
@@ -391,7 +407,6 @@ class Gerencia(object):
             self.__sacoletras.append(letra)
 
         self.__jogador[self.__numerojogadas % 2].adicionar_letra(len(escolha))
-        self.interface.atualizar_tabuleiro(self.__tabuleiro)
 
     def pegar_palavras_tabuleiro(self):
         verticais = []

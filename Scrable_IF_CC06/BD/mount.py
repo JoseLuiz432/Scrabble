@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from pymongo import MongoClient, ASCENDING
 from unicodedata import normalize
 from copy import copy
-from re import match
 import pickle
 
 
 class Mount(object):
-    # instancia as variaveis do host e porta para acesso ao mongo
     def __init__(self, gerente):
-        self.__dicionario = '/home/jose/Faculdade/Faculdade_cc_06/PAA_Wallace/Scrable/Scrable_IF_CC06/BD/wordlist-big-latest.txt'
+        self.__dicionario = '/home/jose/Faculdade/Faculdade_cc-06/PAA_Wallace/Scrable/Scrable_IF_CC06/BD/wordlist-big-latest.txt'
         self.__gerente = gerente
         self.__dict_words = None
 

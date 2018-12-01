@@ -1,4 +1,4 @@
-from Scrable_IF_CC06.BD.mount import Mount
+from BD.mount import Mount
 
 
 class Solve(object):

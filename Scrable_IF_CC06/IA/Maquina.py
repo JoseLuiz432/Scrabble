@@ -169,7 +169,7 @@ class Maquina(object):
         pos_ve = tabuleiro[1][1]
         verticais = copy(tabuleiro[1][0])
         cont = 0
-        zero = [0]*14
+        zero = [0]*15
 
         if not (horizontais and verticais): # primeira jogada
             inicio = self.__solve.retorno_palavras('')
@@ -182,19 +182,22 @@ class Maquina(object):
                 else:
                     print(erro)
 
-        if pos_ho[0][0] != 0 and pos_ho[-1][0] != 14:
+        if pos_ho[0][0] != 0:
             horizontais = [zero] + horizontais
-            horizontais += [zero]
             new_tuple = (pos_ho[0][0] - 1, pos_ho[0][1])
             pos_ho = [new_tuple] + pos_ho
+
+        if pos_ho[-1][0] != 14:
+            horizontais += [zero]
             new_tuple = (pos_ho[-1][0] + 1, pos_ho[-1][1])
             pos_ho += [new_tuple]
 
-        if pos_ve[0][0] != 0 and pos_ve[0][-1] != 14:
+        if pos_ve[0][1] != 0 :
             verticais = [zero] + verticais
-            verticais += [zero]
-            new_tuple = (pos_ve[0][0], pos_ho[0][1] -1)
+            new_tuple = (pos_ve[0][0], pos_ve[0][1] -1)
             pos_ve = [new_tuple] + pos_ve
+        if pos_ve[-1][1] != 14:
+            verticais += [zero]
             new_tuple = (pos_ve[-1][0], pos_ve[-1][1] + 1)
             pos_ve += [new_tuple]
 
@@ -206,15 +209,12 @@ class Maquina(object):
             inicio = self.__solve.retorno_palavras('')
             minhas_letras = letras + ['<']
 
-            for i in range(14):
+            for i in range(15):
                 nova = self.backlinha(inicio, minhas_letras, hor, i, '', False)
                 if nova is not None:
                     pos = i
                     pontos = self.__solve.calcular_pontuacao(nova, pos_h[0], pos, 'h')
                     palavras.append(((nova, pos_h[0], pos, 'h'), pontos))
-                    #signal, word, erro = self.__gerente.inserir_tabuleiro(nova, pos_h[0], pos, 'h')
-                    #if signal:
-                    #    return True, word, pos_h[0], pos, 'h'
 
         cont = 0
         for ver in verticais:
@@ -223,23 +223,22 @@ class Maquina(object):
             inicio = self.__solve.retorno_palavras('')
             minhas_letras = letras + ['<']
 
-            for i in range(14):
+
+            for i in range(15):
                 nova = self.backlinha(inicio, minhas_letras, ver, i, '',  False)
                 if nova is not None:
                     pos = i
                     pontos = self.__solve.calcular_pontuacao(nova, pos, pos_v[1], 'v')
                     palavras.append(((nova, pos, pos_v[1], 'v'), pontos))
-                    #signal, word, erro = self.__gerente.inserir_tabuleiro(nova, pos, pos_v[1], 'v')
-                    #if signal:
-                    #    return True, word, pos, pos_v[1], 'v'
 
         # colocando na ordem das melhores palavras pela pontuacao
-        palavras.sort(key=lambda x : -x[1])
+        palavras.sort(key=lambda x: -x[1])
         for palavra in palavras:
             palavra = palavra[0]
             signal, word, erro = self.__gerente.inserir_tabuleiro(palavra[0], palavra[1], palavra[2], palavra[3])
             if signal:
                 return True, palavra[0], palavra[1], palavra[2], palavra[3]
+
         return False, '', 0, 0, ''
 
     def back(self, dict, letras, new):
@@ -258,7 +257,7 @@ class Maquina(object):
             return None
 
     def backlinha(self, dict, minhas_letras, tabuleiro, pos, new,  flag_le):
-        if pos > 13:
+        if pos > 14:
             if '<' in dict.keys():
                 if flag_le:
                     return new
@@ -266,7 +265,10 @@ class Maquina(object):
                     return None
             else:
                 return None
+
+        # verificando se ha algo na posicao
         if tabuleiro[pos] != 0:
+            # usando todas as letras da posicao
             if tabuleiro[pos] in dict.keys():
                 nova = self.backlinha(dict[tabuleiro[pos]], minhas_letras, tabuleiro, pos+1, new+tabuleiro[pos],  flag_le)
                 if nova is None:
@@ -275,28 +277,29 @@ class Maquina(object):
                     return nova
             else:
                 return None
-        for letra in minhas_letras:
-            if letra in dict.keys():
-                if letra == '<':
-                    if flag_le:
-                        return new
-                    else:
-                        continue
-                novas_letras = copy(minhas_letras)
-                novas_letras.remove(letra)
-                nova = self.backlinha(dict[letra], novas_letras, tabuleiro, pos+1, new + letra,  True)
-                if nova is not None:
-                    return nova
-            elif ' ' in minhas_letras:
-                for coringa in dict.keys():
-                    if coringa == '<':
-                        continue
+        else:
+            for letra in minhas_letras:
+                if letra in dict.keys():
+                    if letra == '<':
+                        if flag_le:
+                            return new
+                        else:
+                            continue
                     novas_letras = copy(minhas_letras)
-                    novas_letras.remove(' ')
-                    nova = self.backlinha(dict[coringa], novas_letras, tabuleiro, pos+1, new + coringa,  True)
+                    novas_letras.remove(letra)
+                    nova = self.backlinha(dict[letra], novas_letras, tabuleiro, pos+1, new + letra,  True)
                     if nova is not None:
                         return nova
 
+                elif ' ' in minhas_letras:
+                    for coringa in dict.keys():
+                        if coringa == '<':
+                            continue
+                        novas_letras = copy(minhas_letras)
+                        novas_letras.remove(' ')
+                        nova = self.backlinha(dict[coringa], novas_letras, tabuleiro, pos+1, new + coringa,  True)
+                        if nova is not None:
+                            return nova
 
         return None
 

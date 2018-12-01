@@ -8,7 +8,6 @@ class Jogador(object):
         self.nome = nome
         self.__maquina = None
 
-
     @property
     def pontuacao(self):
         return self.__pontuacao
