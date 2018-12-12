@@ -223,7 +223,6 @@ class Maquina(object):
             inicio = self.__solve.retorno_palavras('')
             minhas_letras = letras + ['<']
 
-
             for i in range(15):
                 nova = self.backlinha(inicio, minhas_letras, ver, i, '',  False)
                 if nova is not None:

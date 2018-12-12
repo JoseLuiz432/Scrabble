@@ -5,7 +5,7 @@ from Management.Solve import Solve
 from Management.Jogador import Jogador
 from Interface.Interface import Provisorio
 from IA.Maquina import Maquina
-from copy import copy
+from copy import copy,deepcopy
 from random import shuffle, randint
 
 
@@ -296,7 +296,8 @@ class Gerencia(object):
                 else:  # trocar as letras
                     FlagJogador[self.__numerojogadas % 2] = False
                     n = len(player.letras)
-                    for letra in player.letras:
+                    letras = deepcopy(player.letras)
+                    for letra in letras:
                         self.__jogador[self.__numerojogadas % 2].retirar_letra(letra)
                         self.__sacoletras.append(letra)
 
@@ -385,6 +386,7 @@ class Gerencia(object):
             pass
         else:
             self.interface.atualizar_tabuleiro(self.__tabuleiro)
+            return True
 
     def passarvez(self):
         self.__numerojogadas += 1

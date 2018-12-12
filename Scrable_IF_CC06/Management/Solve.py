@@ -11,12 +11,16 @@ class Solve(object):
         3: 2,  # dl
         1: 3,  # tl
         5: 1,  # nada
+        0: 1,
+        2: 1,
+        4: 1,
     }
 
     def __init__(self, gerente):
         self.__dados = Mount(self)
         self.__arvore = None
         self.__gerente = gerente
+        self.__usadas = []
 
     def verificar_palavra(self, word):
         """
@@ -35,19 +39,26 @@ class Solve(object):
         mult = 1
         for c, letra in enumerate(word):
             if d == "h":
+                coo = (x, y+c)
                 p = self.__gerente.verificar_coo(x, y+c)
-                if p in self.pontuacao_palavra and mult == 1:
+
+                if p in self.pontuacao_palavra and mult == 1 and coo not in self.__usadas:
                     mult = self.pontuacao_palavra[p]
-                if p in self.pontuacao_letra.keys():
+                if p in self.pontuacao_letra.keys() and coo not in self.__usadas:
+                    self.__usadas.append(coo)
                     soma += Enum.pontuacao(letra) * self.pontuacao_letra[p]
+                else:
+                    soma += Enum.pontuacao(letra)
             elif d == 'v':
                 p = self.__gerente.verificar_coo(x + c, y)
-
-                if p in self.pontuacao_palavra and mult == 1:
+                coo = (x+c, y)
+                if p in self.pontuacao_palavra and mult == 1 and coo not in self.__usadas:
                     mult = self.pontuacao_palavra[p]
-                if p in self.pontuacao_letra.keys():
+                if p in self.pontuacao_letra.keys() and coo not in self.__usadas:
+                    self.__usadas.append(coo)
                     soma += Enum.pontuacao(letra) * self.pontuacao_letra[p]
-
+                else:
+                    soma += Enum.pontuacao(letra)
         return soma * mult
 
     def iniciar_dicionario(self):
